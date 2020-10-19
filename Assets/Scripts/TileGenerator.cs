@@ -4,33 +4,31 @@ public class TileGenerator : MonoBehaviour
 {
     [SerializeField]
     private Color[] colorRange;
+    [SerializeField]
+    private GameObject hexagonPrefab;
 
-    private static GameObject hexagon;
-    public static TileGenerator Instance;
+    public static TileGenerator SingletonInstance { get; private set; }
 
     private void Awake()
     {
-        if (!Instance)
+        if (!SingletonInstance)
         {
-            Instance = this;
-            //DontDestroyOnLoad(gameObject);
+            SingletonInstance = this;
+            DontDestroyOnLoad(gameObject);
         }
         else
         {
             DestroyImmediate(gameObject);
             return;
         }
-        hexagon = (GameObject)Resources.Load("Hexagon");
     }
 
     public static GameObject GenerateTile(Transform owner)
     {
-        GameObject tile = Instantiate(hexagon, owner);
-        tile.name = "Hexagon";
-
-        int id = (int)Random.Range(0, Instance.colorRange.Length);
+        GameObject tile = Instantiate(SingletonInstance.hexagonPrefab, owner);
+        int id = Random.Range(0, SingletonInstance.colorRange.Length);
         Hexagon tileScript = tile.GetComponent<Hexagon>();
-        tileScript.TileColor = Instance.colorRange[id];
+        tileScript.TileColor = SingletonInstance.colorRange[id];
         tileScript.Id = id;
 
         return tile;
