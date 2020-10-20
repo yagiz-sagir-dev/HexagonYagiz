@@ -1,36 +1,25 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
+using ExtensionMethods;
 
 public class Handle : MonoBehaviour
 {
     [SerializeField]
     private float rotationSpeed = 10f;
 
-    private bool spinning;
-    private float angle;
+    private GameManager gameManager;
+    private GridManager gridManager;
+    private bool spinning = false;
+    private float angle = 0f;
 
-    private const float rotationAngle = 120f;
+    private readonly float rotationAngle = 120f;
+
+    private delegate void DelegateType();
+    private DelegateType attachAll;
 
     private void Awake()
     {
-        spinning = false;
-        angle = 0f;
-    }
-
-    private void Update()
-    {
-        if (Input.GetMouseButtonDown(0))
-        {
-            Vector2 pointerPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            RaycastHit2D hit = Physics2D.Raycast(pointerPos, Vector2.zero);
-            if (hit)
-            {
-                if (hit.transform.name == transform.name)
-                {
-                    spinning = true;
-                }
-            }
-        }
+        gameManager = GameManager.Instance;
+        gridManager = GridManager.Instance;
     }
 
     private void FixedUpdate()
@@ -41,9 +30,58 @@ public class Handle : MonoBehaviour
             angle += rotationSpeed;
             if (angle >= rotationAngle)
             {
+                SignalAttachedBlocks();
                 angle = 0f;
                 spinning = false;
+                gameManager.UnlockInput();
             }
+        }
+    }
+
+    public void Spin()
+    {
+        gameManager.LockInput();
+        spinning = true;
+    }
+
+    public void Lock(Collider2D[] colliders)
+    {
+        Vector2[] overlappingColliderPositions = new Vector2[colliders.Length];
+        for (int index = 0; index < colliders.Length; index++)
+        {
+            Collider2D col = colliders[index];
+
+            overlappingColliderPositions[index] = (Vector2)col.bounds.center;
+
+            Hexagon tileScript = col.gameObject.GetComponent<Hexagon>();
+            attachAll += () => tileScript.Attach(transform);
+        }
+        transform.position = overlappingColliderPositions.FindCenterOfMass();
+        attachAll.Invoke();
+        attachAll = null;
+    }
+
+    public void Unlock()
+    {
+        Hexagon[] tileScripts = transform.GetComponentsInChildren<Hexagon>();
+        foreach (Hexagon tileScript in tileScripts)
+        {
+            tileScript.Detach();
+        }
+    }
+
+    public void Relocate(Collider2D[] colliders)
+    {
+        Unlock();
+        Lock(colliders);
+    }
+
+    private void SignalAttachedBlocks()
+    {
+        Hexagon[] tileScripts = transform.GetComponentsInChildren<Hexagon>();
+        foreach (Hexagon tileScript in tileScripts)
+        {
+            tileScript.GetAssigned();
         }
     }
 }

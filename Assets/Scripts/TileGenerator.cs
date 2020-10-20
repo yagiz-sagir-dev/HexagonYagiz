@@ -7,29 +7,14 @@ public class TileGenerator : MonoBehaviour
     [SerializeField]
     private GameObject hexagonPrefab;
 
-    public static TileGenerator SingletonInstance { get; private set; }
-
-    private void Awake()
+    public GameObject GenerateTile(Transform assignedNode)
     {
-        if (!SingletonInstance)
-        {
-            SingletonInstance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-        else
-        {
-            DestroyImmediate(gameObject);
-            return;
-        }
-    }
-
-    public static GameObject GenerateTile(Transform owner)
-    {
-        GameObject tile = Instantiate(SingletonInstance.hexagonPrefab, owner);
-        int id = Random.Range(0, SingletonInstance.colorRange.Length);
+        GameObject tile = Instantiate(hexagonPrefab, assignedNode);
+        int id = Random.Range(0, colorRange.Length);
         Hexagon tileScript = tile.GetComponent<Hexagon>();
-        tileScript.TileColor = SingletonInstance.colorRange[id];
+        tileScript.TileColor = colorRange[id];
         tileScript.Id = id;
+        tileScript.GetAssigned();
 
         return tile;
     }

@@ -6,10 +6,8 @@ public class Hexagon : MonoBehaviour
     private SpriteRenderer sprite;
     [SerializeField]
     private SpriteRenderer highlight;
-    [SerializeField]
-    private LayerMask nodeLayerMask;
 
-    private bool selected;
+    private LayerMask nodeLayerMask;
 
     private delegate void HandlerDelegate();
     private HandlerDelegate switchSelected;
@@ -27,28 +25,38 @@ public class Hexagon : MonoBehaviour
 
     private void Awake()
     {
+        nodeLayerMask = LayerMask.GetMask("Node");
         highlight.enabled = false;
         switchSelected += () =>
         {
-            selected = !selected;
             highlight.enabled = !highlight.enabled;
         };
     }
 
-    public void UnlockHexagon()
+    public void Attach(Transform parent)
     {
+        transform.SetParent(parent);
         switchSelected.Invoke();
     }
 
-    public void LockHexagon()
+    public void Detach()
     {
-        switchSelected.Invoke();
         Collider2D nodeCollider = Physics2D.OverlapCircle(transform.position, .05f, nodeLayerMask);
         if (nodeCollider)
         {
             transform.SetParent(nodeCollider.transform);
         }
+        switchSelected.Invoke();
     }
 
+    public void GetAssigned()
+    {
+        Collider2D nodeCollider = Physics2D.OverlapCircle(transform.position, .05f, nodeLayerMask);
+        if (nodeCollider)
+        {
+            Node nodeScript = nodeCollider.GetComponent<Node>();
+            nodeScript.AssignBlock(gameObject);
+        }
+    }
 
 }
