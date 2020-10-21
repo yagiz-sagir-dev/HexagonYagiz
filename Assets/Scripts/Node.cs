@@ -1,11 +1,19 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class Node : MonoBehaviour
 {
+    private TileGenerator tileGenerator;
     private Hexagon blockScript;
     private GameObject assignedBlock;
 
     public int BlockColorId { get; private set; }
+    public Tuple<int,int> GridCoords { get; set; }
+
+    private void Awake()
+    {
+        tileGenerator = TileGenerator.Instance;
+    }
 
     public void AssignBlock(GameObject block)
     {
@@ -14,8 +22,26 @@ public class Node : MonoBehaviour
         BlockColorId = blockScript.Id;
     }
 
+    public void ReplaceBlock()
+    {
+        tileGenerator.RerollTile(assignedBlock);
+        BlockColorId = blockScript.Id;
+    }
+
     public void PopBlock()
     {
-        assignedBlock.transform.localScale = new Vector3(.5f, .5f, 1f);
+        blockScript.StartPopping();
+        assignedBlock = null;
+    }
+
+    public bool HasBlock()
+    {
+        return assignedBlock != null;
+    }
+
+    public void RelocateBlock(Transform newNode)
+    {
+        blockScript.Migrate(newNode);
+        assignedBlock = null;
     }
 }

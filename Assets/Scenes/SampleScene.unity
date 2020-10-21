@@ -132,6 +132,7 @@ GameObject:
   - component: {fileID: 323002672}
   - component: {fileID: 323002671}
   - component: {fileID: 323002673}
+  - component: {fileID: 323002674}
   m_Layer: 0
   m_Name: GridHolder
   m_TagString: Untagged
@@ -155,6 +156,7 @@ MonoBehaviour:
   nRows: 9
   nodePrefab: {fileID: 1270665846268167458, guid: d00c0f8fe2515ae4ca6650cb7ae69a7c,
     type: 3}
+  gameManager: {fileID: 323002674}
 --- !u!4 &323002672
 Transform:
   m_ObjectHideFlags: 0
@@ -187,6 +189,23 @@ MonoBehaviour:
   - {r: 0.03510926, g: 0.6886792, b: 0, a: 0}
   - {r: 0, g: 0.5754717, b: 0.46585804, a: 0}
   - {r: 1, g: 0.27934328, b: 0, a: 0}
+  hexagonPrefab: {fileID: 4180521324177439847, guid: 32937457a410c324d8e0a6db4465ee56,
+    type: 3}
+--- !u!114 &323002674
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 323002670}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b38ac8ca9b60f74bbf86a9f593b065e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gridManager: {fileID: 323002671}
+  handlePrefab: {fileID: 5166840823704390424, guid: 61629b65a17b58842b0106454ac4480a,
+    type: 3}
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0

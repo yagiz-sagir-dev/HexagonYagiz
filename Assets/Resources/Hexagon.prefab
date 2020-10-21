@@ -129,9 +129,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sprite: {fileID: 156721701343828239}
   highlight: {fileID: 7433005529524723717}
-  nodeLayerMask:
-    serializedVersion: 2
-    m_Bits: 512
+  popSpeed: 0.05
 --- !u!58 &7354565752217227704
 CircleCollider2D:
   m_ObjectHideFlags: 0

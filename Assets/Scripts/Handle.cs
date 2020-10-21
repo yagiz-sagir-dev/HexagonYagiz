@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using ExtensionMethods;
+using System.Collections;
 
 public class Handle : MonoBehaviour
 {
@@ -10,13 +11,15 @@ public class Handle : MonoBehaviour
     private GridManager gridManager;
     private bool spinning = false;
     private float angle = 0f;
+    private int spinBreakCount;
 
     private readonly float rotationAngle = 120f;
+    private readonly int maxSpinBreakCount = 2;
 
     private delegate void DelegateType();
     private DelegateType attachAll;
 
-    private void Awake()
+    private void Start()
     {
         gameManager = GameManager.Instance;
         gridManager = GridManager.Instance;
@@ -33,7 +36,11 @@ public class Handle : MonoBehaviour
                 SignalAttachedBlocks();
                 angle = 0f;
                 spinning = false;
-                gameManager.UnlockInput();
+                gridManager.IsPopTime();
+
+                if (spinBreakCount-- > 0)
+                    spinning = true;
+                else gameManager.UnlockInput();
             }
         }
     }
@@ -41,6 +48,7 @@ public class Handle : MonoBehaviour
     public void Spin()
     {
         gameManager.LockInput();
+        spinBreakCount = maxSpinBreakCount;
         spinning = true;
     }
 
@@ -54,7 +62,7 @@ public class Handle : MonoBehaviour
             overlappingColliderPositions[index] = (Vector2)col.bounds.center;
 
             Hexagon tileScript = col.gameObject.GetComponent<Hexagon>();
-            attachAll += () => tileScript.Attach(transform);
+            attachAll += () => tileScript.AttachToHandle(transform);
         }
         transform.position = overlappingColliderPositions.FindCenterOfMass();
         attachAll.Invoke();
@@ -66,7 +74,7 @@ public class Handle : MonoBehaviour
         Hexagon[] tileScripts = transform.GetComponentsInChildren<Hexagon>();
         foreach (Hexagon tileScript in tileScripts)
         {
-            tileScript.Detach();
+            tileScript.DetachFromHandle();
         }
     }
 
@@ -81,7 +89,13 @@ public class Handle : MonoBehaviour
         Hexagon[] tileScripts = transform.GetComponentsInChildren<Hexagon>();
         foreach (Hexagon tileScript in tileScripts)
         {
-            tileScript.GetAssigned();
+            tileScript.GetAssignedToNode();
         }
+    }
+
+    public void Decommission()
+    {
+        Unlock();
+        Destroy(gameObject);
     }
 }
