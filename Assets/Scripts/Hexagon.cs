@@ -3,20 +3,23 @@
 public class Hexagon : MonoBehaviour
 {
     [SerializeField]
+    private LayerMask nodeLayerMask;
+    [SerializeField]
     private SpriteRenderer sprite;
     [SerializeField]
     private SpriteRenderer highlight;
     [SerializeField]
     private float popSpeed = .05f;
+    [SerializeField]
+    private int scoreWhenPopped = 5;
 
-    private LayerMask nodeLayerMask;
     private bool popping;
     private bool migrating;
     private Transform targetNode;
     private Transform nearbyNode;
 
-    private delegate void HandlerDelegate();
-    private HandlerDelegate switchSelected;
+    private delegate void DelegateType();
+    private DelegateType switchSelected;
 
     public Color TileColor
     {
@@ -31,7 +34,6 @@ public class Hexagon : MonoBehaviour
 
     private void Awake()
     {
-        nodeLayerMask = LayerMask.GetMask("Node");
         highlight.enabled = false;
         switchSelected += () =>
         {
@@ -60,6 +62,7 @@ public class Hexagon : MonoBehaviour
             transform.localScale -= new Vector3(popSpeed, popSpeed, 0f);
             if (transform.localScale.x < .1f)
             {
+                ScoreManager.AddScore(scoreWhenPopped);
                 Destroy(gameObject);
             }
         }

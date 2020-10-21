@@ -127,9 +127,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d59c92875a4b9f84684b678fa91cd175, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  nodeLayerMask:
+    serializedVersion: 2
+    m_Bits: 512
   sprite: {fileID: 156721701343828239}
   highlight: {fileID: 7433005529524723717}
   popSpeed: 0.05
+  scoreWhenPopped: 5
 --- !u!58 &7354565752217227704
 CircleCollider2D:
   m_ObjectHideFlags: 0

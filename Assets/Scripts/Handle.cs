@@ -1,14 +1,14 @@
 ﻿using UnityEngine;
 using ExtensionMethods;
-using System.Collections;
 
 public class Handle : MonoBehaviour
 {
     [SerializeField]
     private float rotationSpeed = 10f;
 
-    private GameManager gameManager;
+    private InputManager inputManager;
     private GridManager gridManager;
+
     private bool spinning = false;
     private float angle = 0f;
     private int spinBreakCount;
@@ -21,7 +21,7 @@ public class Handle : MonoBehaviour
 
     private void Start()
     {
-        gameManager = GameManager.Instance;
+        inputManager = InputManager.Instance;
         gridManager = GridManager.Instance;
     }
 
@@ -40,14 +40,14 @@ public class Handle : MonoBehaviour
 
                 if (spinBreakCount-- > 0)
                     spinning = true;
-                else gameManager.UnlockInput();
+                else inputManager.UnlockInput();
             }
         }
     }
 
     public void Spin()
     {
-        gameManager.LockInput();
+        inputManager.LockInput();
         spinBreakCount = maxSpinBreakCount;
         spinning = true;
     }
@@ -61,7 +61,7 @@ public class Handle : MonoBehaviour
 
             overlappingColliderPositions[index] = (Vector2)col.bounds.center;
 
-            Hexagon tileScript = col.gameObject.GetComponent<Hexagon>();
+            Hexagon tileScript = col.GetComponent<Hexagon>();
             attachAll += () => tileScript.AttachToHandle(transform);
         }
         transform.position = overlappingColliderPositions.FindCenterOfMass();

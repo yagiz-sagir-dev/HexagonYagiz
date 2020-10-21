@@ -13,7 +13,7 @@ public class GridManager : MonoBehaviour
     [SerializeField]
     private GameObject handlePrefab;
     [SerializeField]
-    private GameManager gameManager;
+    private InputManager gameManager;
 
     public static GridManager Instance { get; private set; }
 
@@ -26,7 +26,7 @@ public class GridManager : MonoBehaviour
     private readonly int nOverlapsToLayHandle = 3;
     private readonly float hexagonSidesRatio = .8660254f;
 
-    private static readonly float overlapCircleRadius = .3f;
+    private static readonly float overlapCircleRadius = .35f;
     private static LayerMask hexagonLayerMask;
 
     private void Awake()
@@ -69,8 +69,39 @@ public class GridManager : MonoBehaviour
 
     private void DisplayGrid()
     {
-        //transform.localScale = new Vector3(.6f, .6f, 1f);
-        transform.position = new Vector2(-nColumns * hexagonSidesRatio / 2f + .5f, nRows / 2f - .25f);
+        Transform camNode1 = Instantiate(nodePrefab, transform);
+        Transform camNode2 = Instantiate(nodePrefab, transform);
+
+        camNode1.position = new Vector2(-1, 1);
+        camNode2.position = new Vector2(nColumns, -nRows);
+
+        var cam = Camera.main;
+
+        Transform firstNode = nodeGrid[0, 0];
+        Transform hLastNode = nodeGrid[0, nColumns - 1];
+        Transform vLastNode = nodeGrid[nRows - 1, 0];
+
+        float extent = firstNode.GetComponent<CircleCollider2D>().bounds.extents.x;
+
+        float hMin = firstNode.transform.position.x - extent;
+        float hMax = hLastNode.transform.position.x + extent;
+
+        float vMin = vLastNode.transform.position.y - extent;
+        float vMax = firstNode.transform.position.y + extent;
+
+        Vector2 center = new Vector2((hMax + hMin) / 2, (vMax + vMin) / 2);
+
+        cam.transform.position = new Vector3(center.x, center.y + extent * 4, -10f);
+
+        var point1 = cam.WorldToViewportPoint(camNode1.position);
+        var point2 = cam.WorldToViewportPoint(camNode2.position);
+
+        while (point1.x <= 0f || point2.y <= 0f)
+        {
+            Camera.main.orthographicSize += .5f;
+            point1 = cam.WorldToViewportPoint(camNode1.position);
+            point2 = cam.WorldToViewportPoint(camNode2.position);
+        }
     }
 
     private void GenerateGrid()
@@ -108,7 +139,11 @@ public class GridManager : MonoBehaviour
         HashSet<Node> nodesToPop = CheckForPops();
         if (nodesToPop.Count > 0)
         {
-            moveMade = true;
+            if (!moveMade)
+            {
+                ScoreManager.MadeMove();
+                moveMade = true;
+            }
             if (handle)
                 handleScript.Decommission();
             HashSet<int> popColumns = new HashSet<int>();

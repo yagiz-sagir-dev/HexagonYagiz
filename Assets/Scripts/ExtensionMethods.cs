@@ -5,11 +5,6 @@ namespace ExtensionMethods
 {
     public static class NecessaryExtensionMethods
     {
-        public static Transform[] FindChildren(this Transform transform, string name)
-        {
-            return transform.GetComponentsInChildren<Transform>().Where(t => t.name == name).ToArray();
-        }
-
         public static Vector2 FindCenterOfMass(this Vector2[] vectors)
         {
             Vector2 center = Vector2.zero;
