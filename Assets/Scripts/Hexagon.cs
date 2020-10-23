@@ -18,7 +18,7 @@ public class Hexagon : MonoBehaviour
     private Transform targetNode;
     private Transform nearbyNode;
 
-    private CountManager countManager;
+    private ScoreManager scoreManager;
 
     private delegate void DelegateType();
     private DelegateType switchSelected;
@@ -47,7 +47,7 @@ public class Hexagon : MonoBehaviour
 
     private void Start()
     {
-        countManager = CountManager.Instance;
+        scoreManager = ScoreManager.Instance;
     }
 
     private void Update()
@@ -71,7 +71,7 @@ public class Hexagon : MonoBehaviour
             transform.localScale -= new Vector3(popSpeed, popSpeed, 0f);
             if (transform.localScale.x < .1f)
             {
-                countManager.AddScore(scoreWhenPopped);
+                scoreManager.AddScore(scoreWhenPopped);
                 Destroy(gameObject);
             }
         }

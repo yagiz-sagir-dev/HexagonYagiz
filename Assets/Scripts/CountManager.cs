@@ -5,18 +5,10 @@ using UnityEngine;
 public class CountManager : MonoBehaviour
 {
     [SerializeField]
-    private TextMeshProUGUI scoreText;
-    [SerializeField]
     private TextMeshProUGUI moveCountText;
-    [SerializeField]
-    private int scoreToGenerateBomb = 1000;
 
     public static CountManager Instance { get; private set; }
-    public int Score { get; private set; }
 
-    private TileGenerator tileGenerator;
-
-    private int scoreCountForBomb;
     private int moveCount;
     private List<Bomb> bombs;
 
@@ -36,25 +28,11 @@ public class CountManager : MonoBehaviour
     private void Start()
     {
         bombs = new List<Bomb>();
-        tileGenerator = TileGenerator.Instance;
     }
 
     void Update()
     {
-        scoreText.text = Score.ToString();
         moveCountText.text = moveCount.ToString();
-    }
-
-    public void AddScore(int scoreToAdd)
-    {
-        Score += scoreToAdd;
-        scoreCountForBomb += scoreToAdd;
-        if (scoreCountForBomb >= scoreToGenerateBomb)
-        {
-            scoreCountForBomb -= scoreToGenerateBomb;
-            tileGenerator.GenerateBomb();
-        }
-
     }
 
     public void MadeMove()
@@ -79,7 +57,6 @@ public class CountManager : MonoBehaviour
 
     public void ResetCounts()
     {
-        Score = 0;
         moveCount = 0;
     }
 }

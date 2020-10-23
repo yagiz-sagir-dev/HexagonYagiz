@@ -58,7 +58,6 @@ public class GridManager : MonoBehaviour
 
     private static readonly float overlapCircleRadius = .5f;
     private LayerMask hexagonLayerMask;
-    private LayerMask handleLayerMask;
 
     private void Awake()
     {
@@ -74,7 +73,6 @@ public class GridManager : MonoBehaviour
         }
         nodeGrid = new Transform[nRows, nColumns];
         hexagonLayerMask = LayerMask.GetMask("Block");
-        handleLayerMask = LayerMask.GetMask("Handle");
     }
 
     void Start()

@@ -10,6 +10,8 @@ public class GameKiller : MonoBehaviour
 
     private InputManager inputManager;
     private CountManager countManager;
+    private ScoreManager scoreManager;
+    private GridManager gridManager;
 
     public static GameKiller Instance { get; private set; }
 
@@ -33,21 +35,22 @@ public class GameKiller : MonoBehaviour
     {
         inputManager = InputManager.Instance;
         countManager = CountManager.Instance;
+        scoreManager = ScoreManager.Instance;
+        gridManager = GridManager.Instance;
     }
 
     public void KillGame()
     {
         inputManager.LockInput();
         gameOverPanel.gameObject.SetActive(true);
-        finalScore.text = CountManager.Instance.Score.ToString();
+        finalScore.text = scoreManager.Score.ToString();
     }
 
     public void RestartGame()
     {
-        GridManager gridManager = GridManager.Instance;
-        CountManager countManager = CountManager.Instance;
         gridManager.RestartGrid();
         countManager.ResetCounts();
+        scoreManager.ResetScore();
 
         gameOverPanel.gameObject.SetActive(false);
     }
