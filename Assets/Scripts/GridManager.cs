@@ -12,22 +12,53 @@ public class GridManager : MonoBehaviour
     private Transform nodePrefab;
     [SerializeField]
     private GameObject handlePrefab;
-    [SerializeField]
-    private InputManager gameManager;
+
+    private readonly List<Tuple<int, int>> neighborsForOddColumns = new List<Tuple<int, int>>()
+        {
+            new Tuple<int, int>(0,-1),
+            new Tuple<int, int>(1,-1),
+            new Tuple<int, int>(1,0),
+            new Tuple<int, int>(1,1),
+            new Tuple<int, int>(0,1),
+            new Tuple<int, int>(-1,0)
+        };
+    private readonly List<Tuple<int, int>> neighborsForEvenColumns = new List<Tuple<int, int>>()
+        {
+            new Tuple<int, int>(0,-1),
+            new Tuple<int, int>(1,0),
+            new Tuple<int, int>(0,1),
+            new Tuple<int, int>(-1,1),
+            new Tuple<int, int>(-1,0),
+            new Tuple<int, int>(-1,-1)
+        };
+    private readonly List<Tuple<int, int>> pairsToCheck = new List<Tuple<int, int>>()
+        {
+            new Tuple<int, int>(0,1),
+            new Tuple<int, int>(1,2),
+            new Tuple<int, int>(2,3),
+            new Tuple<int, int>(3,4),
+            new Tuple<int, int>(4,5),
+            new Tuple<int, int>(5,0)
+        };
 
     public static GridManager Instance { get; private set; }
 
-    private Transform[,] nodeGrid;
+    private CountManager countManager;
     private TileGenerator tileGenerator;
+    private InputManager inputManager;
+    private GameKiller gameKiller;
+
     private bool moveMade;
     private Handle handleScript;
     private Transform handle;
+    private Transform[,] nodeGrid;
 
     private readonly int nOverlapsToLayHandle = 3;
     private readonly float hexagonSidesRatio = .8660254f;
 
-    private static readonly float overlapCircleRadius = .35f;
-    private static LayerMask hexagonLayerMask;
+    private static readonly float overlapCircleRadius = .5f;
+    private LayerMask hexagonLayerMask;
+    private LayerMask handleLayerMask;
 
     private void Awake()
     {
@@ -43,11 +74,15 @@ public class GridManager : MonoBehaviour
         }
         nodeGrid = new Transform[nRows, nColumns];
         hexagonLayerMask = LayerMask.GetMask("Block");
+        handleLayerMask = LayerMask.GetMask("Handle");
     }
 
     void Start()
     {
+        countManager = CountManager.Instance;
         tileGenerator = TileGenerator.Instance;
+        inputManager = InputManager.Instance;
+        gameKiller = GameKiller.Instance;
         GenerateGrid();
         DisplayGrid();
     }
@@ -56,13 +91,16 @@ public class GridManager : MonoBehaviour
     {
         if (moveMade)
         {
-            if (!CheckForEmptyNodes())
+            if (!CheckForEmptyNodes() && !IsPopTime())
             {
-                if (!IsPopTime())
+                countManager.MadeMove();
+                moveMade = false;
+                if (!CheckMovesLeft())
                 {
-                    gameManager.UnlockInput();
-                    moveMade = false;
+                    gameKiller.KillGame();
+                    return;
                 }
+                inputManager.UnlockInput();
             }
         }
     }
@@ -75,7 +113,7 @@ public class GridManager : MonoBehaviour
         camNode1.position = new Vector2(-1, 1);
         camNode2.position = new Vector2(nColumns, -nRows);
 
-        var cam = Camera.main;
+        Camera cam = Camera.main;
 
         Transform firstNode = nodeGrid[0, 0];
         Transform hLastNode = nodeGrid[0, nColumns - 1];
@@ -93,8 +131,8 @@ public class GridManager : MonoBehaviour
 
         cam.transform.position = new Vector3(center.x, center.y + extent * 4, -10f);
 
-        var point1 = cam.WorldToViewportPoint(camNode1.position);
-        var point2 = cam.WorldToViewportPoint(camNode2.position);
+        Vector3 point1 = cam.WorldToViewportPoint(camNode1.position);
+        Vector3 point2 = cam.WorldToViewportPoint(camNode2.position);
 
         while (point1.x <= 0f || point2.y <= 0f)
         {
@@ -124,6 +162,7 @@ public class GridManager : MonoBehaviour
         }
 
         HashSet<Node> nodesToPop = CheckForPops();
+
         while (nodesToPop.Count > 0)
         {
             foreach (Node nodeToPop in nodesToPop)
@@ -131,6 +170,24 @@ public class GridManager : MonoBehaviour
                 nodeToPop.ReplaceBlock();
             }
             nodesToPop = CheckForPops();
+        }
+
+        if (!CheckMovesLeft())
+        {
+            RestartGrid();
+            return;
+        }
+    }
+
+    private void ResetGrid()
+    {
+        for (int row = 0; row < nRows; row++)
+        {
+            for (int col = 0; col < nColumns; col++)
+            {
+                Destroy(nodeGrid[row, col].gameObject);
+                nodeGrid[row, col] = null;
+            }
         }
     }
 
@@ -141,11 +198,11 @@ public class GridManager : MonoBehaviour
         {
             if (!moveMade)
             {
-                ScoreManager.MadeMove();
                 moveMade = true;
             }
             if (handle)
                 handleScript.Decommission();
+
             HashSet<int> popColumns = new HashSet<int>();
             Queue<Node> emptyNodes = new Queue<Node>();
             List<Node> emptyNodesInWait = new List<Node>();
@@ -203,46 +260,84 @@ public class GridManager : MonoBehaviour
         return false;
     }
 
-    private HashSet<Node> CheckForPops()
+    private bool CheckMovesLeft()
     {
-        HashSet<Node> nodesToPop = new HashSet<Node>();
-        List<Tuple<int, int>> neighborsForOddColumns = new List<Tuple<int, int>>()
-        {
-            new Tuple<int, int>(0,-1),
-            new Tuple<int, int>(1,-1),
-            new Tuple<int, int>(1,0),
-            new Tuple<int, int>(1,1),
-            new Tuple<int, int>(0,1),
-            new Tuple<int, int>(-1,0)
-        };
-        List<Tuple<int, int>> neighborsForEvenColumns = new List<Tuple<int, int>>()
-        {
-            new Tuple<int, int>(0,-1),
-            new Tuple<int, int>(1,0),
-            new Tuple<int, int>(0,1),
-            new Tuple<int, int>(-1,1),
-            new Tuple<int, int>(-1,0),
-            new Tuple<int, int>(-1,-1)
-        };
-        List<Tuple<int, int>> pairsToCheck = new List<Tuple<int, int>>()
-        {
-            new Tuple<int, int>(0,1),
-            new Tuple<int, int>(1,2),
-            new Tuple<int, int>(2,3),
-            new Tuple<int, int>(3,4),
-            new Tuple<int, int>(4,5),
-            new Tuple<int, int>(5,0)
-        };
+        HashSet<int> consecutiveColors = new HashSet<int>();
+        HashSet<int> consecutiveIndexes = new HashSet<int>();
+        List<int> colorCodesInOrder = new List<int>();
+
         for (int row = 0; row < nRows; row++)
         {
             for (int col = 0; col < nColumns; col++)
             {
+                if (col % 2 > 0)
+                {
+                    foreach (Tuple<int, int> neighborCoords in neighborsForOddColumns)
+                    {
+                        Node neighborNode;
+                        try { neighborNode = nodeGrid[row + neighborCoords.Item1, col + neighborCoords.Item2].GetComponent<Node>(); }
+                        catch (Exception) { continue; }
+                        colorCodesInOrder.Add(neighborNode.BlockColorId);
+                    }
+                }
+                else
+                {
+                    foreach (Tuple<int, int> neighborCoords in neighborsForEvenColumns)
+                    {
+                        Node neighborNode;
+                        try { neighborNode = nodeGrid[row + neighborCoords.Item1, col + neighborCoords.Item2].GetComponent<Node>(); }
+                        catch (Exception) { continue; }
+                        colorCodesInOrder.Add(neighborNode.BlockColorId);
+                    }
+                }
+
+                for (int index = 0; index < colorCodesInOrder.Count; index++)
+                {
+                    if (colorCodesInOrder[index] == colorCodesInOrder[(index + 1) % colorCodesInOrder.Count])
+                    {
+                        if (consecutiveColors.Contains(colorCodesInOrder[index]))
+                        {
+                            return true;
+                        }
+                        consecutiveColors.Add(colorCodesInOrder[index]);
+                        consecutiveIndexes.Add(index);
+                        consecutiveIndexes.Add((index + 1) % colorCodesInOrder.Count);
+                    }
+                }
+                for (int index = 0; index < colorCodesInOrder.Count; index++)
+                {
+                    if (consecutiveColors.Contains(colorCodesInOrder[index]) && !consecutiveIndexes.Contains(index))
+                    {
+                        return true;
+                    }
+                }
+                consecutiveColors.Clear();
+                consecutiveIndexes.Clear();
+                colorCodesInOrder.Clear();
+            }
+        }
+        return false;
+    }
+
+    private HashSet<Node> CheckForPops()
+    {
+        HashSet<Node> nodesToPop = new HashSet<Node>();
+        Node node, neighbor1, neighbor2;
+
+        for (int row = 0; row < nRows; row++)
+        {
+            for (int col = 0; col < nColumns; col++)
+            {
+                node = nodeGrid[row, col].GetComponent<Node>();
+
                 foreach (Tuple<int, int> pair in pairsToCheck)
                 {
                     try
                     {
                         Tuple<int, int> neighbor1Coords;
                         Tuple<int, int> neighbor2Coords;
+
+
                         if (col % 2 > 0)
                         {
                             neighbor1Coords = neighborsForOddColumns[pair.Item1];
@@ -254,9 +349,8 @@ public class GridManager : MonoBehaviour
                             neighbor2Coords = neighborsForEvenColumns[pair.Item2];
                         }
 
-                        Node node = nodeGrid[row, col].GetComponent<Node>();
-                        Node neighbor1 = nodeGrid[row + neighbor1Coords.Item1, col + neighbor1Coords.Item2].GetComponent<Node>();
-                        Node neighbor2 = nodeGrid[row + neighbor2Coords.Item1, col + neighbor2Coords.Item2].GetComponent<Node>();
+                        neighbor1 = nodeGrid[row + neighbor1Coords.Item1, col + neighbor1Coords.Item2].GetComponent<Node>();
+                        neighbor2 = nodeGrid[row + neighbor2Coords.Item1, col + neighbor2Coords.Item2].GetComponent<Node>();
 
                         if (node.BlockColorId == neighbor1.BlockColorId && neighbor1.BlockColorId == neighbor2.BlockColorId)
                         {
@@ -278,6 +372,31 @@ public class GridManager : MonoBehaviour
     private Collider2D[] CheckPosition(Vector2 pointerPos)
     {
         Collider2D[] colliders = Physics2D.OverlapCircleAll(pointerPos, overlapCircleRadius, hexagonLayerMask);
+
+        if (colliders.Length < nOverlapsToLayHandle)
+            return null;
+
+        else if (colliders.Length > nOverlapsToLayHandle)
+        {
+            Collider2D[] closestColliders = new Collider2D[nOverlapsToLayHandle];
+
+            for (int a = 0; a < nOverlapsToLayHandle; a++)
+            {
+                int closestColliderIndex = a;
+                for (int b = a + 1; b < colliders.Length; b++)
+                {
+                    if (Vector3.Distance(colliders[closestColliderIndex].bounds.center, pointerPos) > Vector3.Distance(colliders[b].bounds.center, pointerPos))
+                        closestColliderIndex = b;
+                }
+                Collider2D temp = colliders[a];
+                colliders[a] = colliders[closestColliderIndex];
+                colliders[closestColliderIndex] = temp;
+
+                closestColliders[a] = colliders[a];
+            }
+            return closestColliders;
+        }
+
         return colliders;
     }
 
@@ -285,7 +404,7 @@ public class GridManager : MonoBehaviour
     {
         Vector2 pointerPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         Collider2D[] colliders = CheckPosition(pointerPos);
-        if (colliders.Length >= nOverlapsToLayHandle)
+        if (colliders != null)
         {
             if (!handle)
             {
@@ -296,17 +415,15 @@ public class GridManager : MonoBehaviour
             }
             else
             {
-                RaycastHit2D hit = Physics2D.Raycast(pointerPos, Vector2.zero);
-                if (hit)
-                {
-                    if (hit.transform.name == handle.name)
-                        handleScript.Spin();
-                }
-                else
-                {
-                    handleScript.Relocate(colliders);
-                }
+                handleScript.Relocate(colliders);
             }
         }
+    }
+
+    public void RestartGrid()
+    {
+        ResetGrid();
+        GenerateGrid();
+        inputManager.UnlockInput();
     }
 }

@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using ExtensionMethods;
 
 public class Handle : MonoBehaviour
 {
@@ -10,6 +9,7 @@ public class Handle : MonoBehaviour
     private GridManager gridManager;
 
     private bool spinning = false;
+    private bool clockwise = false;
     private float angle = 0f;
     private int spinBreakCount;
 
@@ -29,7 +29,11 @@ public class Handle : MonoBehaviour
     {
         if (spinning)
         {
-            transform.Rotate(transform.forward, rotationSpeed);
+            if (clockwise)
+                transform.Rotate(transform.forward, -rotationSpeed);
+            else
+                transform.Rotate(transform.forward, rotationSpeed);
+
             angle += rotationSpeed;
             if (angle >= rotationAngle)
             {
@@ -45,10 +49,19 @@ public class Handle : MonoBehaviour
         }
     }
 
-    public void Spin()
+    public void SpinCounterclokwise()
     {
         inputManager.LockInput();
         spinBreakCount = maxSpinBreakCount;
+        clockwise = false;
+        spinning = true;
+    }
+
+    public void SpinClokwise()
+    {
+        inputManager.LockInput();
+        spinBreakCount = maxSpinBreakCount;
+        clockwise = true;
         spinning = true;
     }
 
@@ -64,9 +77,20 @@ public class Handle : MonoBehaviour
             Hexagon tileScript = col.GetComponent<Hexagon>();
             attachAll += () => tileScript.AttachToHandle(transform);
         }
-        transform.position = overlappingColliderPositions.FindCenterOfMass();
+        transform.position = FindCenterOfMass(overlappingColliderPositions);
         attachAll.Invoke();
         attachAll = null;
+    }
+
+    private Vector2 FindCenterOfMass(Vector2[] vectors)
+    {
+        Vector2 center = Vector2.zero;
+        for (int index = 0; index < vectors.Length; index++)
+        {
+            center += vectors[index];
+        }
+
+        return center / vectors.Length;
     }
 
     public void Unlock()

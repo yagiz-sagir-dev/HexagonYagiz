@@ -132,7 +132,7 @@ MonoBehaviour:
     m_Bits: 512
   sprite: {fileID: 156721701343828239}
   highlight: {fileID: 7433005529524723717}
-  popSpeed: 0.05
+  popSpeed: 0.04
   scoreWhenPopped: 5
 --- !u!58 &7354565752217227704
 CircleCollider2D:

@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class InputManager : MonoBehaviour
 {
@@ -27,6 +28,8 @@ public class InputManager : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0) && !inputLocked)
         {
+            if (EventSystem.current.IsPointerOverGameObject())
+                return;
             gridManager.OperateHandle();
         }
     }

@@ -9,7 +9,7 @@ public class Hexagon : MonoBehaviour
     [SerializeField]
     private SpriteRenderer highlight;
     [SerializeField]
-    private float popSpeed = .05f;
+    private float popSpeed = .04f;
     [SerializeField]
     private int scoreWhenPopped = 5;
 
@@ -18,8 +18,12 @@ public class Hexagon : MonoBehaviour
     private Transform targetNode;
     private Transform nearbyNode;
 
+    private CountManager countManager;
+
     private delegate void DelegateType();
     private DelegateType switchSelected;
+
+    Vector3 velocity = Vector3.zero;
 
     public Color TileColor
     {
@@ -41,11 +45,16 @@ public class Hexagon : MonoBehaviour
         };
     }
 
+    private void Start()
+    {
+        countManager = CountManager.Instance;
+    }
+
     private void Update()
     {
         if (migrating)
         {
-            transform.position = Vector3.Slerp(transform.position, targetNode.position, .05f);
+            transform.position = Vector3.SmoothDamp(transform.position, targetNode.position, ref velocity, .3f);
             if (Vector3.Distance(transform.position, targetNode.position) < .01f)
             {
                 transform.position = targetNode.position;
@@ -62,7 +71,7 @@ public class Hexagon : MonoBehaviour
             transform.localScale -= new Vector3(popSpeed, popSpeed, 0f);
             if (transform.localScale.x < .1f)
             {
-                ScoreManager.AddScore(scoreWhenPopped);
+                countManager.AddScore(scoreWhenPopped);
                 Destroy(gameObject);
             }
         }

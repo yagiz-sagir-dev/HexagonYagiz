@@ -6,8 +6,12 @@ public class TileGenerator : MonoBehaviour
     private Color[] colorRange;
     [SerializeField]
     private GameObject hexagonPrefab;
+    [SerializeField]
+    private GameObject bombprefab;
 
     public static TileGenerator Instance { get; private set; }
+
+    private bool bombNext;
 
     private void Awake()
     {
@@ -25,7 +29,16 @@ public class TileGenerator : MonoBehaviour
 
     public GameObject GenerateTile()
     {
-        GameObject tile = Instantiate(hexagonPrefab);
+        GameObject tile;
+
+        if (bombNext)
+        {
+            tile = Instantiate(bombprefab);
+            bombNext = false;
+        }
+        else
+            tile = Instantiate(hexagonPrefab);
+
         int id = Random.Range(0, colorRange.Length);
         Hexagon tileScript = tile.GetComponent<Hexagon>();
         tileScript.TileColor = colorRange[id];
@@ -40,5 +53,10 @@ public class TileGenerator : MonoBehaviour
         Hexagon tileScript = tile.GetComponent<Hexagon>();
         tileScript.TileColor = colorRange[id];
         tileScript.Id = id;
+    }
+
+    public void GenerateBomb()
+    {
+        Instance.bombNext = true;
     }
 }
