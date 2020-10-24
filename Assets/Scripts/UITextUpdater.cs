@@ -6,9 +6,9 @@ public class UITextUpdater : BaseUIUpdater
     [SerializeField]
     private TextMeshProUGUI UIElement;
 
-    protected override void Start()
+    protected override void Awake()
     {
-        base.Start();
+        base.Awake();
     }
 
     public override void UpdateUI(object param)

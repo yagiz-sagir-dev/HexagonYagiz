@@ -302,6 +302,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rotationSpeed: 10
+  arrowButtons: {fileID: 6118637437655669811}
 --- !u!58 &9130396357524537909
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -382,7 +383,7 @@ GameObject:
   - component: {fileID: 8103992249204482475}
   - component: {fileID: 7459796817662732251}
   m_Layer: 5
-  m_Name: Canvas
+  m_Name: Arrow Buttons
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

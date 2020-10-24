@@ -3,12 +3,12 @@
 public class Tile : MonoBehaviour
 {
     [SerializeField]
-    private LayerMask nodeLayerMask;
+    private LayerMask nodeLayerMask;    // Tiles use layermasks of nodes to detect nearby nodes to attach 
     [SerializeField]
     private SpriteRenderer sprite;
     [SerializeField]
-    private SpriteRenderer highlight;
-    [SerializeField]
+    private SpriteRenderer highlight;   // White highlight indicates that the tile has been picked by a handle and is enabled when
+    [SerializeField]                    // tile attaches to this handle
     private float popSpeed;
     [SerializeField]
     private int scoreWhenPopped;
@@ -38,8 +38,8 @@ public class Tile : MonoBehaviour
         if (migrating)
         {
             transform.position = Vector3.SmoothDamp(transform.position, targetNode.position, ref velocity, .2f);
-            if (Vector3.Distance(transform.position, targetNode.position) < .01f)
-            {
+            if (Vector3.Distance(transform.position, targetNode.position) < .01f)   // Tile smoothly moves towards the target node while migrating
+            {                                                                       // and when they are close enough, attaches to it
                 transform.position = targetNode.position;
                 migrating = false;
                 AttachToNode();
@@ -51,10 +51,10 @@ public class Tile : MonoBehaviour
     {
         if (popping)
         {
-            transform.localScale -= new Vector3(popSpeed, popSpeed, 0f);
+            transform.localScale -= new Vector3(popSpeed, popSpeed, 0f);    // While popping, tile slowly shrikns until it destroys itself
             if (transform.localScale.x < .1f)
             {
-                scoreManager.AddScore(scoreWhenPopped);
+                scoreManager.AddScore(scoreWhenPopped);     // And add its score yield to user score
                 Destroy(gameObject);
             }
         }
@@ -64,7 +64,7 @@ public class Tile : MonoBehaviour
     {
         nearbyNode = null;
         Collider2D nodeCollider = Physics2D.OverlapCircle(transform.position, .05f, nodeLayerMask);
-        if (nodeCollider)
+        if (nodeCollider)   // Overlapcircle detects nearby nodes when tile needs to attach or assign
         {
             nearbyNode = nodeCollider.transform;
         }
@@ -94,7 +94,7 @@ public class Tile : MonoBehaviour
         if (nearbyNode)
         {
             Node nodeScript = nearbyNode.GetComponent<Node>();
-            nodeScript.AssignBlock(gameObject);
+            nodeScript.AssignTile(gameObject);
             return true;
         }
         return false;
@@ -117,8 +117,8 @@ public class Tile : MonoBehaviour
         AttachToNode();
     }
 
-    public int GetId()
-    {
+    public int GetId()  // Id values exist to keep finding matching colors job overall easier and simpler than checking actual
+    {                   // color values against each other.
         return colorId;
     }
 

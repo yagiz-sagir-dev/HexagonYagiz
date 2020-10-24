@@ -3,7 +3,6 @@ using UnityEngine.EventSystems;
 
 public class InputManager : MonoBehaviour
 {
-    [SerializeField]
     private GridManager gridManager;
 
     public static InputManager Instance { get; private set; }
@@ -24,11 +23,16 @@ public class InputManager : MonoBehaviour
         }
     }
 
+    private void Start()
+    {
+        gridManager = GridManager.Instance;
+    }
+
     void Update()
     {
         if (Input.GetMouseButtonDown(0) && !inputLocked)
         {
-            if (EventSystem.current.IsPointerOverGameObject())
+            if (EventSystem.current.IsPointerOverGameObject())  // If the point that user touched is on a UI element, input is disregarded
                 return;
             gridManager.OperateHandle();
         }

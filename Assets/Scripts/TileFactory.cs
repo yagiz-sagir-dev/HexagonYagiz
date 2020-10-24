@@ -11,7 +11,7 @@ public class TileFactory : MonoBehaviour
 
     public static TileFactory Instance { get; private set; }
 
-    private bool bombNext;
+    private bool bombNext;  // Indicates that there is a bomb next in the production line.
 
     private void Awake()
     {
@@ -43,7 +43,7 @@ public class TileFactory : MonoBehaviour
         return tile;
     }
 
-    public void RollTile(GameObject tile)
+    public void RollTile(GameObject tile)   // Randomizes properties of a tile. It could be new or sent by its node to reroll
     {
         int id = Random.Range(0, colorRange.Length);
         Tile tileScript = tile.GetComponent<Tile>();

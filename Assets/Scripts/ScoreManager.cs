@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+// ScoreManager keeps track of the points that user gains
 public class ScoreManager : BaseUIUser
 {
     public static ScoreManager Instance { get; private set; }
@@ -25,8 +26,8 @@ public class ScoreManager : BaseUIUser
     public void AddScore(int scoreToAdd)
     {
         score += scoreToAdd;
-        view.UpdateUI(score);
-        scoreChanged?.Invoke();
+        view.UpdateUI(score);   // UI element is updated when score changes
+        scoreChanged?.Invoke(); // and observers are warned
     }
 
     public void ResetScore()

@@ -5,7 +5,7 @@ public abstract class BaseUIUpdater : MonoBehaviour, IUIUpdater
     [SerializeField]
     protected BaseUIUser uiUser;
 
-    protected virtual void Start()
+    protected virtual void Awake()
     {
         uiUser.BindToView(this);
     }

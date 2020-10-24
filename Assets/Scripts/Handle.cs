@@ -4,6 +4,8 @@ public class Handle : MonoBehaviour
 {
     [SerializeField]
     private float rotationSpeed = 10f;
+    [SerializeField]
+    private Transform arrowButtons;     // UI buttons that triggers SpinClockwise and SpinCounterclockwise methods in this class
 
     private InputManager inputManager;
     private GridManager gridManager;
@@ -11,11 +13,11 @@ public class Handle : MonoBehaviour
     private bool spinning = false;
     private bool clockwise = false;
     private float angle = 0f;
-    private int spinBreakCount;
+    private int spinBreakCount = 0;
 
     private readonly float rotationAngle = 120f;
-    private readonly int maxSpinBreakCount = 2;
-
+    private readonly int maxSpinBreakCount = 2;     // Handle makes 3 spins with 2 breaks and at the end of each spin it lets the GridManager
+                                                    // know that it is the time to check the grid
     private delegate void DelegateType();
     private DelegateType attachAll;
 
@@ -37,14 +39,18 @@ public class Handle : MonoBehaviour
             angle += rotationSpeed;
             if (angle >= rotationAngle)
             {
-                SignalAttachedBlocks();
-                angle = 0f;
+                SignalAttachedTiles();      // When a spin ends, the handle sends a signal to the tiles that are attached to the nodes on which
+                angle = 0f;                 // the handle resides   
                 spinning = false;
-                gridManager.IsPopTime();
+                gridManager.HandleSpinned();
 
                 if (spinBreakCount-- > 0)
                     spinning = true;
-                else inputManager.UnlockInput();
+                else
+                {
+                    arrowButtons.gameObject.SetActive(true);    // Arrow buttons are disabled as well as other kinds of user input during
+                    inputManager.UnlockInput();                 // spins. When the handle is done, they are enabled again.
+                }
             }
         }
     }
@@ -63,12 +69,14 @@ public class Handle : MonoBehaviour
 
     private void Spin()
     {
+        arrowButtons.gameObject.SetActive(false);
         inputManager.LockInput();
         spinBreakCount = maxSpinBreakCount;
         spinning = true;
     }
+    
 
-    public void Lock(Collider2D[] colliders)
+    public void Lock(Collider2D[] colliders)        // Colliders that GridManager gets as a result of a user input are sent to the handle.
     {
         Vector2[] overlappingColliderPositions = new Vector2[colliders.Length];
         for (int index = 0; index < colliders.Length; index++)
@@ -78,10 +86,10 @@ public class Handle : MonoBehaviour
             overlappingColliderPositions[index] = col.bounds.center;
 
             Tile tileScript = col.GetComponent<Tile>();
-            attachAll += () => tileScript.AttachToHandle(transform);
-        }
-        transform.position = FindCenterOfMass(overlappingColliderPositions);
-        attachAll?.Invoke();
+            attachAll += () => tileScript.AttachToHandle(transform);    // Tiles must attach to the handle after it takes position otherwise
+        }                                                               // attached tile change their positions along with it
+        transform.position = FindCenterOfMass(overlappingColliderPositions);    // Handle finds the center point of those colliders and 
+        attachAll?.Invoke();                                                    // goes there, then attaches to corresponding tiles
         attachAll = null;
     }
 
@@ -110,8 +118,11 @@ public class Handle : MonoBehaviour
         Unlock();
         Lock(colliders);
     }
-
-    private void SignalAttachedBlocks()
+    /*
+     * Handle sends a signal to attached tiles between spins so the assign to the nodes that they stand on, telling those nodes what
+     * color they are. So when GridManager checks the grid between handle spins, it can find matching tiles correctly.
+     */
+    private void SignalAttachedTiles()
     {
         Tile[] tileScripts = transform.GetComponentsInChildren<Tile>();
         foreach (Tile tileScript in tileScripts)

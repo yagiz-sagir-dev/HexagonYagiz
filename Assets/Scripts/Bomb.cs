@@ -8,8 +8,8 @@ public class Bomb : BaseUIUser
     private GameKiller gameKiller;
     private MoveManager moveManager;
 
-    private bool justArrived;
-    private int countdown;
+    private bool justArrived;   // Countdown of the bomb should not be triggered in the same round that the bomb is generated. justArrived
+    private int countdown;      // is used for that purpose
 
     private void Awake()
     {
@@ -21,8 +21,8 @@ public class Bomb : BaseUIUser
     {
         gameKiller = GameKiller.Instance;
         moveManager = MoveManager.Instance;
-        moveManager.AddNewMoveDependentTrigger(Countdown);
-    }
+        moveManager.AddNewMoveDependentTrigger(Countdown);      // Everytime user makes a move, moveManager runs its MadeMove() method which invokes
+    }                                                           // countdown subroutines in every bomb in the game.
 
     public void Countdown()
     {
@@ -31,10 +31,10 @@ public class Bomb : BaseUIUser
         else
         {
             countdown--;
-            view.UpdateUI(countdown);
+            view.UpdateUI(countdown);       // Everytime countdown value changes, UI element that shows this value on the bomb is updated
             if (countdown < 1)
             {
-                gameKiller.KillGame();
+                gameKiller.KillGame();      // if the countdown hits zero, bomb goes off and game is over
             }
             justArrived = false;
         }

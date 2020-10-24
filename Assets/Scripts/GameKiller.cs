@@ -1,17 +1,15 @@
-﻿using TMPro;
+﻿using System;
 using UnityEngine;
 
 public class GameKiller : BaseUIUser
 {
-    [SerializeField]
-    private GameOverPanelController gameOverPanelController;
-
     private InputManager inputManager;
     private MoveManager moveManager;
     private ScoreManager scoreManager;
     private GridManager gridManager;
-    
 
+    private Action gameIsOver;
+    
     public static GameKiller Instance { get; private set; }
 
     private void Awake()
@@ -34,13 +32,13 @@ public class GameKiller : BaseUIUser
         moveManager = MoveManager.Instance;
         scoreManager = ScoreManager.Instance;
         gridManager = GridManager.Instance;
-        view.UpdateUI(false);
+        view.UpdateUI(false);       // View of this class controls game over panel which starts disabled when the game begins
     }
 
     public void KillGame()
     {
-        gameOverPanelController.SetFinalScore();
-        view.UpdateUI(true);
+        gameIsOver?.Invoke();
+        view.UpdateUI(true);        // When the game is over, game over panel is activated by the ui controller
         inputManager.LockInput();
     }
 
@@ -57,5 +55,15 @@ public class GameKiller : BaseUIUser
     {
         base.BindToView(view);
         view.UpdateUI(false);
+    }
+
+    public void AddGameOverTrigger(Action callback)
+    {
+        gameIsOver += callback;
+    }
+
+    public void RemoveGameOverTrigger(Action callback)
+    {
+        gameIsOver -= callback;
     }
 }

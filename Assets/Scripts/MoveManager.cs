@@ -1,5 +1,7 @@
 ﻿using System;
 
+ // MoveManager class keeps a count for the moves that user makes and warns observing components when a move is made
+
 public class MoveManager : BaseUIUser
 {
     public static MoveManager Instance { get; private set; }

@@ -1,47 +1,53 @@
 ﻿using System;
 using UnityEngine;
 
+/*
+ * Nodes mark locations that tiles can stand on. It provides communication between GridManager and tiles. Tiles attach to nodes,
+ * assign to them to let them know about their color codes. This makes checking them easier.
+ */
+
 public class Node : MonoBehaviour
 {
     private TileFactory tileFactory;
     private Tile tileScript;
-    private GameObject assignedBlock;
+    private GameObject assignedTile;
 
-    public int TileColorId { get; private set; }
-    public Tuple<int,int> GridCoords { get; set; }
+    public int TileColorId { get; private set; }    // Nodes know color codes of their assigned tiles so GridManager doesn't need to communicate
+                                                    // with tiles.
+    public Tuple<int,int> GridCoords { get; set; }  // Grid indexes of a node is known by it. That makes locating their neighbors much easier.
 
     private void Awake()
     {
         tileFactory = TileFactory.Instance;
     }
 
-    public void AssignBlock(GameObject block)
+    public void AssignTile(GameObject tile)
     {
-        assignedBlock = block;
-        tileScript = block.GetComponent<Tile>();
+        assignedTile = tile;
+        tileScript = tile.GetComponent<Tile>();
         TileColorId = tileScript.GetId();
     }
 
-    public void ReplaceBlock()
+    public void ReplaceTile()   // Nodes can send their tiles for reroll if their colors aren't suitable
     {
-        tileFactory.RollTile(assignedBlock);
+        tileFactory.RollTile(assignedTile);
         TileColorId = tileScript.GetId();
     }
 
-    public void PopBlock()
+    public void PopTile()
     {
         tileScript.StartPopping();
-        assignedBlock = null;
+        assignedTile = null;
     }
 
-    public bool HasBlock()
+    public bool HasTile()
     {
-        return assignedBlock != null;
+        return assignedTile != null;
     }
 
-    public void RelocateBlock(Transform newNode)
-    {
+    public void RelocateTile(Transform newNode) // This is used when there are empty nodes on the grid. Tiles migrate from 
+    {                                           // their assigned node to an empty node if they are at the same column
         tileScript.Migrate(newNode);
-        assignedBlock = null;
+        assignedTile = null;
     }
 }
