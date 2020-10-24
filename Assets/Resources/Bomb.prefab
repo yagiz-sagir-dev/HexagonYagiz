@@ -93,6 +93,7 @@ GameObject:
   - component: {fileID: 6793123125787606950}
   - component: {fileID: 7354565752217227704}
   - component: {fileID: 5032366588383268839}
+  - component: {fileID: 8071314537369879188}
   m_Layer: 8
   m_Name: Bomb
   m_TagString: Untagged
@@ -165,7 +166,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   initialCountdown: 10
-  countdownText: {fileID: 7609328061322347450}
+--- !u!114 &8071314537369879188
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4180521324177439847}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a77d4cd5550a3f54b87787fd14ecbd7b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  uiUser: {fileID: 5032366588383268839}
+  UIElement: {fileID: 7609328061322347450}
 --- !u!1 &4698885723797526210
 GameObject:
   m_ObjectHideFlags: 0

@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class Hexagon : MonoBehaviour
+public class Tile : MonoBehaviour
 {
     [SerializeField]
     private LayerMask nodeLayerMask;
@@ -9,40 +9,23 @@ public class Hexagon : MonoBehaviour
     [SerializeField]
     private SpriteRenderer highlight;
     [SerializeField]
-    private float popSpeed = .04f;
+    private float popSpeed;
     [SerializeField]
-    private int scoreWhenPopped = 5;
+    private int scoreWhenPopped;
 
     private bool popping;
     private bool migrating;
     private Transform targetNode;
     private Transform nearbyNode;
+    private int colorId;
 
     private ScoreManager scoreManager;
 
-    private delegate void DelegateType();
-    private DelegateType switchSelected;
-
     Vector3 velocity = Vector3.zero;
-
-    public Color TileColor
-    {
-        get { return TileColor; }
-        set
-        {
-            value.a = 1;
-            sprite.color = value;
-        }
-    }
-    public int Id { get; set; }
 
     private void Awake()
     {
         highlight.enabled = false;
-        switchSelected += () =>
-        {
-            highlight.enabled = !highlight.enabled;
-        };
     }
 
     private void Start()
@@ -54,7 +37,7 @@ public class Hexagon : MonoBehaviour
     {
         if (migrating)
         {
-            transform.position = Vector3.SmoothDamp(transform.position, targetNode.position, ref velocity, .3f);
+            transform.position = Vector3.SmoothDamp(transform.position, targetNode.position, ref velocity, .2f);
             if (Vector3.Distance(transform.position, targetNode.position) < .01f)
             {
                 transform.position = targetNode.position;
@@ -90,13 +73,13 @@ public class Hexagon : MonoBehaviour
     public void AttachToHandle(Transform handle)
     {
         transform.SetParent(handle);
-        switchSelected.Invoke();
+        highlight.enabled = true;
     }
 
     public void DetachFromHandle()
     {
         AttachToNode();
-        switchSelected.Invoke();
+        highlight.enabled = false;
     }
 
     private void AttachToNode()
@@ -132,5 +115,21 @@ public class Hexagon : MonoBehaviour
     {
         transform.position = node.position;
         AttachToNode();
+    }
+
+    public int GetId()
+    {
+        return colorId;
+    }
+
+    public void SetId(int colorId)
+    {
+        this.colorId = colorId;
+    }
+
+    public void SetColor(Color color)
+    {
+        color.a = 1f;
+        sprite.color = color;
     }
 }

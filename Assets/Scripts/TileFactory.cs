@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class TileGenerator : MonoBehaviour
+public class TileFactory : MonoBehaviour
 {
     [SerializeField]
     private Color[] colorRange;
@@ -9,7 +9,7 @@ public class TileGenerator : MonoBehaviour
     [SerializeField]
     private GameObject bombprefab;
 
-    public static TileGenerator Instance { get; private set; }
+    public static TileFactory Instance { get; private set; }
 
     private bool bombNext;
 
@@ -39,20 +39,16 @@ public class TileGenerator : MonoBehaviour
         else
             tile = Instantiate(hexagonPrefab);
 
-        int id = Random.Range(0, colorRange.Length);
-        Hexagon tileScript = tile.GetComponent<Hexagon>();
-        tileScript.TileColor = colorRange[id];
-        tileScript.Id = id;
-
+        RollTile(tile);
         return tile;
     }
 
-    public void RerollTile(GameObject tile)
+    public void RollTile(GameObject tile)
     {
         int id = Random.Range(0, colorRange.Length);
-        Hexagon tileScript = tile.GetComponent<Hexagon>();
-        tileScript.TileColor = colorRange[id];
-        tileScript.Id = id;
+        Tile tileScript = tile.GetComponent<Tile>();
+        tileScript.SetColor(colorRange[id]);
+        tileScript.SetId(id);
     }
 
     public void GenerateBomb()

@@ -1,15 +1,12 @@
-﻿using TMPro;
-using UnityEngine;
+﻿using UnityEngine;
 
-public class Bomb : MonoBehaviour
+public class Bomb : BaseUIUser
 {
     [SerializeField]
     private int initialCountdown;
-    [SerializeField]
-    private TextMeshProUGUI countdownText;
 
     private GameKiller gameKiller;
-    private CountManager countManager;
+    private MoveManager moveManager;
 
     private bool justArrived;
     private int countdown;
@@ -23,13 +20,8 @@ public class Bomb : MonoBehaviour
     private void Start()
     {
         gameKiller = GameKiller.Instance;
-        countManager = CountManager.Instance;
-        countManager.RegisterNewBomb(transform);
-    }
-
-    private void Update()
-    {
-        countdownText.text = countdown.ToString();
+        moveManager = MoveManager.Instance;
+        moveManager.AddNewMoveDependentTrigger(Countdown);
     }
 
     public void Countdown()
@@ -39,6 +31,7 @@ public class Bomb : MonoBehaviour
         else
         {
             countdown--;
+            view.UpdateUI(countdown);
             if (countdown < 1)
             {
                 gameKiller.KillGame();
@@ -49,6 +42,12 @@ public class Bomb : MonoBehaviour
 
     private void OnDestroy()
     {
-        countManager.DisposeOfBomb(transform);
+        moveManager.RemoveMoveDependentTrigger(Countdown);
+    }
+
+    public override void BindToView(IUIUpdater view)
+    {
+        base.BindToView(view);
+        view.UpdateUI(countdown);
     }
 }

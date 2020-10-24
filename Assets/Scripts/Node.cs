@@ -3,34 +3,34 @@ using UnityEngine;
 
 public class Node : MonoBehaviour
 {
-    private TileGenerator tileGenerator;
-    private Hexagon blockScript;
+    private TileFactory tileFactory;
+    private Tile tileScript;
     private GameObject assignedBlock;
 
-    public int BlockColorId { get; private set; }
+    public int TileColorId { get; private set; }
     public Tuple<int,int> GridCoords { get; set; }
 
     private void Awake()
     {
-        tileGenerator = TileGenerator.Instance;
+        tileFactory = TileFactory.Instance;
     }
 
     public void AssignBlock(GameObject block)
     {
         assignedBlock = block;
-        blockScript = block.GetComponent<Hexagon>();
-        BlockColorId = blockScript.Id;
+        tileScript = block.GetComponent<Tile>();
+        TileColorId = tileScript.GetId();
     }
 
     public void ReplaceBlock()
     {
-        tileGenerator.RerollTile(assignedBlock);
-        BlockColorId = blockScript.Id;
+        tileFactory.RollTile(assignedBlock);
+        TileColorId = tileScript.GetId();
     }
 
     public void PopBlock()
     {
-        blockScript.StartPopping();
+        tileScript.StartPopping();
         assignedBlock = null;
     }
 
@@ -41,7 +41,7 @@ public class Node : MonoBehaviour
 
     public void RelocateBlock(Transform newNode)
     {
-        blockScript.Migrate(newNode);
+        tileScript.Migrate(newNode);
         assignedBlock = null;
     }
 }

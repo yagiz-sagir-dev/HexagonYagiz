@@ -333,8 +333,9 @@ GameObject:
   - component: {fileID: 323002671}
   - component: {fileID: 323002673}
   - component: {fileID: 323002674}
-  - component: {fileID: 323002675}
   - component: {fileID: 323002676}
+  - component: {fileID: 323002677}
+  - component: {fileID: 323002675}
   m_Layer: 0
   m_Name: GameHolder
   m_TagString: Untagged
@@ -418,12 +419,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 323002670}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f11f01d5c8e28fb47a2b4726d247fa03, type: 3}
+  m_Script: {fileID: 11500000, guid: 9c3edad6a095fb84bae4f40d323e5ba3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  scoreText: {fileID: 1561890528}
-  moveCountText: {fileID: 966275779}
-  scoreToGenerateBomb: 1000
 --- !u!114 &323002676
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -438,6 +436,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameOverPanel: {fileID: 1392732712}
   finalScore: {fileID: 534868748}
+--- !u!114 &323002677
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 323002670}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c2303f86918b98c41940fa2d8e4b622b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  scoreToGenerateBomb: 100
+  scoreText: {fileID: 1561890528}
 --- !u!1 &338839747
 GameObject:
   m_ObjectHideFlags: 0

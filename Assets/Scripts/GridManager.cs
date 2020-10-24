@@ -43,8 +43,8 @@ public class GridManager : MonoBehaviour
 
     public static GridManager Instance { get; private set; }
 
-    private CountManager countManager;
-    private TileGenerator tileGenerator;
+    private MoveManager moveManager;
+    private TileFactory tileFactory;
     private InputManager inputManager;
     private GameKiller gameKiller;
 
@@ -77,8 +77,8 @@ public class GridManager : MonoBehaviour
 
     void Start()
     {
-        countManager = CountManager.Instance;
-        tileGenerator = TileGenerator.Instance;
+        moveManager = MoveManager.Instance;
+        tileFactory = TileFactory.Instance;
         inputManager = InputManager.Instance;
         gameKiller = GameKiller.Instance;
         GenerateGrid();
@@ -91,7 +91,7 @@ public class GridManager : MonoBehaviour
         {
             if (!CheckForEmptyNodes() && !IsPopTime())
             {
-                countManager.MadeMove();
+                moveManager.MadeMove();
                 moveMade = false;
                 if (!CheckMovesLeft())
                 {
@@ -147,7 +147,7 @@ public class GridManager : MonoBehaviour
             for (int col = 0; col < nColumns; col++)
             {
                 Transform node = Instantiate(nodePrefab, transform);
-                Hexagon tileScript = tileGenerator.GenerateTile().GetComponent<Hexagon>();
+                Tile tileScript = tileFactory.GenerateTile().GetComponent<Tile>();
                 tileScript.PlaceAtNode(node);
 
                 float posX = col * hexagonSidesRatio;
@@ -234,8 +234,8 @@ public class GridManager : MonoBehaviour
 
             foreach (Node emptyNode in emptyNodesInWait)
             {
-                GameObject tile = tileGenerator.GenerateTile();
-                Hexagon tileScript = tile.GetComponent<Hexagon>();
+                GameObject tile = tileFactory.GenerateTile();
+                Tile tileScript = tile.GetComponent<Tile>();
 
                 tile.transform.position = new Vector2(emptyNode.transform.position.x, 10f);
                 tileScript.Migrate(emptyNode.transform);
@@ -275,7 +275,7 @@ public class GridManager : MonoBehaviour
                         Node neighborNode;
                         try { neighborNode = nodeGrid[row + neighborCoords.Item1, col + neighborCoords.Item2].GetComponent<Node>(); }
                         catch (Exception) { continue; }
-                        colorCodesInOrder.Add(neighborNode.BlockColorId);
+                        colorCodesInOrder.Add(neighborNode.TileColorId);
                     }
                 }
                 else
@@ -285,7 +285,7 @@ public class GridManager : MonoBehaviour
                         Node neighborNode;
                         try { neighborNode = nodeGrid[row + neighborCoords.Item1, col + neighborCoords.Item2].GetComponent<Node>(); }
                         catch (Exception) { continue; }
-                        colorCodesInOrder.Add(neighborNode.BlockColorId);
+                        colorCodesInOrder.Add(neighborNode.TileColorId);
                     }
                 }
 
@@ -350,7 +350,7 @@ public class GridManager : MonoBehaviour
                         neighbor1 = nodeGrid[row + neighbor1Coords.Item1, col + neighbor1Coords.Item2].GetComponent<Node>();
                         neighbor2 = nodeGrid[row + neighbor2Coords.Item1, col + neighbor2Coords.Item2].GetComponent<Node>();
 
-                        if (node.BlockColorId == neighbor1.BlockColorId && neighbor1.BlockColorId == neighbor2.BlockColorId)
+                        if (node.TileColorId == neighbor1.TileColorId && neighbor1.TileColorId == neighbor2.TileColorId)
                         {
                             nodesToPop.Add(node);
                             nodesToPop.Add(neighbor1);

@@ -1,17 +1,16 @@
 ﻿using TMPro;
 using UnityEngine;
 
-public class GameKiller : MonoBehaviour
+public class GameKiller : BaseUIUser
 {
     [SerializeField]
-    private Transform gameOverPanel;
-    [SerializeField]
-    private TextMeshProUGUI finalScore;
+    private GameOverPanelController gameOverPanelController;
 
     private InputManager inputManager;
-    private CountManager countManager;
+    private MoveManager moveManager;
     private ScoreManager scoreManager;
     private GridManager gridManager;
+    
 
     public static GameKiller Instance { get; private set; }
 
@@ -27,31 +26,36 @@ public class GameKiller : MonoBehaviour
             DestroyImmediate(gameObject);
             return;
         }
-
-        gameOverPanel.gameObject.SetActive(false);
     }
 
     private void Start()
     {
         inputManager = InputManager.Instance;
-        countManager = CountManager.Instance;
+        moveManager = MoveManager.Instance;
         scoreManager = ScoreManager.Instance;
         gridManager = GridManager.Instance;
+        view.UpdateUI(false);
     }
 
     public void KillGame()
     {
+        gameOverPanelController.SetFinalScore();
+        view.UpdateUI(true);
         inputManager.LockInput();
-        gameOverPanel.gameObject.SetActive(true);
-        finalScore.text = scoreManager.Score.ToString();
     }
 
     public void RestartGame()
     {
         gridManager.RestartGrid();
-        countManager.ResetCounts();
         scoreManager.ResetScore();
+        moveManager.ResetMoves();
 
-        gameOverPanel.gameObject.SetActive(false);
+        view.UpdateUI(false);
+    }
+
+    public override void BindToView(IUIUpdater view)
+    {
+        base.BindToView(view);
+        view.UpdateUI(false);
     }
 }

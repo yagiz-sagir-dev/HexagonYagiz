@@ -51,17 +51,20 @@ public class Handle : MonoBehaviour
 
     public void SpinCounterclokwise()
     {
-        inputManager.LockInput();
-        spinBreakCount = maxSpinBreakCount;
         clockwise = false;
-        spinning = true;
+        Spin();
     }
 
     public void SpinClokwise()
     {
+        clockwise = true;
+        Spin();
+    }
+
+    private void Spin()
+    {
         inputManager.LockInput();
         spinBreakCount = maxSpinBreakCount;
-        clockwise = true;
         spinning = true;
     }
 
@@ -72,13 +75,13 @@ public class Handle : MonoBehaviour
         {
             Collider2D col = colliders[index];
 
-            overlappingColliderPositions[index] = (Vector2)col.bounds.center;
+            overlappingColliderPositions[index] = col.bounds.center;
 
-            Hexagon tileScript = col.GetComponent<Hexagon>();
+            Tile tileScript = col.GetComponent<Tile>();
             attachAll += () => tileScript.AttachToHandle(transform);
         }
         transform.position = FindCenterOfMass(overlappingColliderPositions);
-        attachAll.Invoke();
+        attachAll?.Invoke();
         attachAll = null;
     }
 
@@ -95,8 +98,8 @@ public class Handle : MonoBehaviour
 
     public void Unlock()
     {
-        Hexagon[] tileScripts = transform.GetComponentsInChildren<Hexagon>();
-        foreach (Hexagon tileScript in tileScripts)
+        Tile[] tileScripts = transform.GetComponentsInChildren<Tile>();
+        foreach (Tile tileScript in tileScripts)
         {
             tileScript.DetachFromHandle();
         }
@@ -110,8 +113,8 @@ public class Handle : MonoBehaviour
 
     private void SignalAttachedBlocks()
     {
-        Hexagon[] tileScripts = transform.GetComponentsInChildren<Hexagon>();
-        foreach (Hexagon tileScript in tileScripts)
+        Tile[] tileScripts = transform.GetComponentsInChildren<Tile>();
+        foreach (Tile tileScript in tileScripts)
         {
             tileScript.GetAssignedToNode();
         }
