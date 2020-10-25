@@ -4,8 +4,6 @@ public class Handle : MonoBehaviour
 {
     [SerializeField]
     private float rotationSpeed = 10f;
-    [SerializeField]
-    private Transform arrowButtons;     // UI buttons that triggers SpinClockwise and SpinCounterclockwise methods in this class
 
     private InputManager inputManager;
     private GridManager gridManager;
@@ -47,9 +45,8 @@ public class Handle : MonoBehaviour
                 if (spinBreakCount-- > 0)
                     spinning = true;
                 else
-                {
-                    arrowButtons.gameObject.SetActive(true);    // Arrow buttons are disabled as well as other kinds of user input during
-                    inputManager.UnlockInput();                 // spins. When the handle is done, they are enabled again.
+                {                                               // User input is disabled during
+                    inputManager.UnlockInput();                 // spins. When the handle is done, it is enabled again.
                 }
             }
         }
@@ -69,7 +66,6 @@ public class Handle : MonoBehaviour
 
     private void Spin()
     {
-        arrowButtons.gameObject.SetActive(false);
         inputManager.LockInput();
         spinBreakCount = maxSpinBreakCount;
         spinning = true;

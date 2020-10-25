@@ -9,6 +9,15 @@ public class GridManager : MonoBehaviour
     // left for the player to make. If not, it calls game ending method from
     // GameKiller class
 
+    enum Directions
+    {
+        Right,
+        Left,
+        Up,
+        Down,
+        None
+    }
+
     [SerializeField]
     private LayerMask tileLayerMask;
     [SerializeField]
@@ -436,7 +445,7 @@ public class GridManager : MonoBehaviour
                 handleScript.Lock(colliders);
             }
             else
-            {               
+            {
                 handleScript.Relocate(colliders);       // If there is already a handle in the game, it is relocated to the new
             }                                           // position that the user input determined           
         }
@@ -447,5 +456,68 @@ public class GridManager : MonoBehaviour
         ResetGrid();
         GenerateGrid();
         inputManager.UnlockInput();
+    }
+
+    public void ProcessSwipe(Vector2 pointerDownPos, Vector2 pointerUpPos)
+    {
+        Directions swipeDirection = Directions.None;
+        if (handle)
+        {
+            Vector2 projection = Vector3.Project(pointerDownPos, pointerUpPos);
+            float swipeProjectionAngle = Vector3.Angle(projection - (Vector2)handle.position, pointerUpPos - pointerDownPos);
+            if (!IsValueInRange(swipeProjectionAngle, 30f, 150f))
+                return;
+            float swipeDirectionAngle = Vector3.SignedAngle(pointerUpPos - pointerDownPos, new Vector3(1f, 0f, 0f), Vector3.back);
+
+            if(IsValueInRange(swipeDirectionAngle, 0f, 45f) || IsValueInRange(swipeDirectionAngle, -45f, 0f))
+            {
+                swipeDirection = Directions.Right;
+            }
+            else if (IsValueInRange(swipeDirectionAngle, 45f, 135f))
+            {
+                swipeDirection = Directions.Up;
+            }
+            else if (IsValueInRange(swipeDirectionAngle, 135f, 180f) || IsValueInRange(swipeDirectionAngle, -180f, -135f))
+            {
+                swipeDirection = Directions.Left;
+            }
+            else if (IsValueInRange(swipeDirectionAngle, -135f, -45f))
+            {
+                swipeDirection = Directions.Down;
+            }
+
+            switch (swipeDirection)
+            {
+                case Directions.Left:
+                    if (projection.y < handle.position.y)
+                        handleScript.SpinClokwise();
+                    else if (projection.y > handle.position.y)
+                        handleScript.SpinCounterclokwise();
+                    break;
+                case Directions.Right:
+                    if (projection.y < handle.position.y)
+                        handleScript.SpinCounterclokwise();
+                    else if (projection.y > handle.position.y)
+                        handleScript.SpinClokwise();
+                    break;
+                case Directions.Up:
+                    if (projection.x < handle.position.x)
+                        handleScript.SpinClokwise();
+                    else if (projection.x > handle.position.x)
+                        handleScript.SpinCounterclokwise();
+                    break;
+                case Directions.Down:
+                    if (projection.x < handle.position.x)
+                        handleScript.SpinCounterclokwise();
+                    else if (projection.x > handle.position.x)
+                        handleScript.SpinClokwise();
+                    break;
+            }
+        }
+    }
+
+    private bool IsValueInRange(float value, float min, float max)
+    {
+        return value <= max && value > min;
     }
 }
