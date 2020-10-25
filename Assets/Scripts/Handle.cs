@@ -5,8 +5,7 @@ public class Handle : MonoBehaviour
     [SerializeField]
     private float rotationSpeed = 10f;
 
-    private InputManager inputManager;
-    private GridManager gridManager;
+    private HandleController controller;
 
     private bool spinning = false;
     private bool clockwise = false;
@@ -18,12 +17,6 @@ public class Handle : MonoBehaviour
                                                     // know that it is the time to check the grid
     private delegate void DelegateType();
     private DelegateType attachAll;
-
-    private void Start()
-    {
-        inputManager = InputManager.Instance;
-        gridManager = GridManager.Instance;
-    }
 
     private void FixedUpdate()
     {
@@ -40,13 +33,13 @@ public class Handle : MonoBehaviour
                 SignalAttachedTiles();      // When a spin ends, the handle sends a signal to the tiles that are attached to the nodes on which
                 angle = 0f;                 // the handle resides   
                 spinning = false;
-                gridManager.HandleSpinned();
+                controller.SpinRoundCompleted();
 
                 if (spinBreakCount-- > 0)
                     spinning = true;
                 else
                 {                                               // User input is disabled during
-                    inputManager.UnlockInput();                 // spins. When the handle is done, it is enabled again.
+                    controller.HandleStoppedSpinning(); ;                 // spins. When the handle is done, it is enabled again.
                 }
             }
         }
@@ -66,7 +59,7 @@ public class Handle : MonoBehaviour
 
     private void Spin()
     {
-        inputManager.LockInput();
+        controller.HandleStartedSpinning();
         spinBreakCount = maxSpinBreakCount;
         spinning = true;
     }
@@ -131,5 +124,10 @@ public class Handle : MonoBehaviour
     {
         Unlock();
         Destroy(gameObject);
+    }
+
+    public void SetController(HandleController controller)
+    {
+        this.controller = controller;
     }
 }

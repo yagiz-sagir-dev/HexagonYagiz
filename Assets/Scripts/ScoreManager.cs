@@ -11,6 +11,7 @@ public class ScoreManager : BaseUIUser
 
     private void Awake()
     {
+        #region Singleton
         if (!Instance)
         {
             Instance = this;
@@ -21,6 +22,7 @@ public class ScoreManager : BaseUIUser
             DestroyImmediate(gameObject);
             return;
         }
+        #endregion
     }
 
     public void AddScore(int scoreToAdd)

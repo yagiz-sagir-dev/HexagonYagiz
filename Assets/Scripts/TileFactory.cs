@@ -15,6 +15,7 @@ public class TileFactory : MonoBehaviour
 
     private void Awake()
     {
+        #region Singleton
         if (!Instance)
         {
             Instance = this;
@@ -25,6 +26,7 @@ public class TileFactory : MonoBehaviour
             DestroyImmediate(gameObject);
             return;
         }
+        #endregion
     }
 
     public GameObject GenerateTile()

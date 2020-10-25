@@ -9,25 +9,12 @@ public class GridManager : MonoBehaviour
     // left for the player to make. If not, it calls game ending method from
     // GameKiller class
 
-    enum Directions
-    {
-        Right,
-        Left,
-        Up,
-        Down,
-        None
-    }
-
-    [SerializeField]
-    private LayerMask tileLayerMask;
     [SerializeField]
     private int nColumns = 8;
     [SerializeField]
     private int nRows = 9;
     [SerializeField]
     private Transform nodePrefab;
-    [SerializeField]
-    private GameObject handlePrefab;
 
     /* 
      * Code was written specifically for this layout. In this layout, nodes at columns of odd numbers are placed
@@ -61,23 +48,19 @@ public class GridManager : MonoBehaviour
     private GameKiller gameKiller;
 
     private bool moveMade;
-    private Handle handleScript;
-    private Transform handle;
     private Transform[,] nodeGrid;
 
-    private readonly int nOverlapsToLayHandle = 3;
     /*
      * Since horizontal and vertical dimensions of a hexagon are not equal, rows can be placed closer to each other than
      * columns are or vice versa. This ratio helps placing tiles at equal intervals horizontally and vertically
      */
     private readonly float hexagonSidesRatio = .8660254f;
 
-    private static readonly float overlapCircleRadius = .5f;
-
     private void Awake()
     {
-        if (!Instance)                              // Singleton instances are used for each manager class to make sure
-        {                                           // of their persistence and uniqueness throughout the lifetime of the game
+        #region Singleton
+        if (!Instance)
+        {
             Instance = this;
             DontDestroyOnLoad(gameObject);
         }
@@ -86,6 +69,7 @@ public class GridManager : MonoBehaviour
             DestroyImmediate(gameObject);
             return;
         }
+        #endregion
         nodeGrid = new Transform[nRows, nColumns];
     }
 
@@ -214,12 +198,13 @@ public class GridManager : MonoBehaviour
             }
 
             HashSet<int> popColumns = new HashSet<int>();
-            Queue<Node> emptyNodes = new Queue<Node>();
+            List<Node> emptyNodes = new List<Node>();
             List<Node> emptyNodesInWait = new List<Node>();
+            Node emptyNode;
 
             foreach (Node nodeToPop in nodesToPop)
             {
-                popColumns.Add(nodeToPop.GridCoords.Item2);     // All matching blocks are popped and the method keeps track of their
+                popColumns.Add(nodeToPop.GridCoords.Item2);     // All matching tiles are popped and the method keeps track of their
                 nodeToPop.PopTile();                           // column indexes
             }
 
@@ -229,14 +214,15 @@ public class GridManager : MonoBehaviour
                 {
                     Node nodeScript = nodeGrid[row, popColumn].GetComponent<Node>();
                     if (!nodeScript.HasTile())
-                        emptyNodes.Enqueue(nodeScript);
+                        emptyNodes.Add(nodeScript);
                     else
                     {
                         if (emptyNodes.Count > 0)
                         {
-                            Node emptyNode = emptyNodes.Dequeue();
+                            emptyNode = emptyNodes[0];
                             nodeScript.RelocateTile(emptyNode.transform);
-                            emptyNodes.Enqueue(nodeScript);
+                            emptyNodes.RemoveAt(0);
+                            emptyNodes.Add(nodeScript);
                         }
                     }
                 }
@@ -244,14 +230,16 @@ public class GridManager : MonoBehaviour
                 emptyNodes.Clear();                             // emptyNodesInWait list to populate them again with new tiles
             }
 
-            foreach (Node emptyNode in emptyNodesInWait)        // For each empty node, a new tile is created right above the position of
-            {                                                   // this node
+            for (int index = 0; index < emptyNodesInWait.Count; index++)    // For each empty node, a new tile is created right above the position of
+            {                                                               // this node
+                emptyNode = emptyNodesInWait[index];
                 GameObject tile = tileFactory.GenerateTile();
                 Tile tileScript = tile.GetComponent<Tile>();
 
                 tile.transform.position = new Vector2(emptyNode.transform.position.x, 10f);
-                tileScript.Migrate(emptyNode.transform);                                        // and starts moving towards the empty node
+                tileScript.Migrate(emptyNode.transform);                    // and starts moving towards the empty node
             }
+
             return true;
         }
         return false;
@@ -268,12 +256,6 @@ public class GridManager : MonoBehaviour
             }
         }
         return false;
-    }
-
-    public void HandleSpinned()             // After the handle completes one round of its spinning, matching tiles are checked.
-    {                                       // If there are any, handle is destroyed 
-        if (IsPopTime())
-            handleScript.Decommission();
     }
 
     /*
@@ -344,7 +326,7 @@ public class GridManager : MonoBehaviour
         return false;
     }
 
-    // The method CheckForPops() goes through the grid to check every tile against its neighbors 2 by 2 to find and matching 3 tiles
+    // The method CheckForPops() goes through the grid to check every tile against its neighbors 2 by 2 to find any matching 3 tiles
 
     private HashSet<Node> CheckForPops()
     {
@@ -396,128 +378,10 @@ public class GridManager : MonoBehaviour
         return nodesToPop;
     }
 
-    /*
-     * CheckPosition method runs when user input taken. It checks the pointer position to see if user touched a valid spot
-     * to place the handle.
-     */
-
-    private Collider2D[] CheckPosition(Vector2 pointerPos)
-    {
-        Collider2D[] colliders = Physics2D.OverlapCircleAll(pointerPos, overlapCircleRadius, tileLayerMask);    // An overlap circle is drawn to check
-                                                                                                                // nearby tile colliders
-        if (colliders.Length < nOverlapsToLayHandle)    // If the number of colliders that the circle overlaps aren't enough to 
-            return null;                                // place a handle, method simply returns nothing
-
-        else if (colliders.Length > nOverlapsToLayHandle)   // If it is more than required, closest colliders of required number 
-        {                                                   // are taken and returned
-            Collider2D[] closestColliders = new Collider2D[nOverlapsToLayHandle];
-
-            for (int a = 0; a < nOverlapsToLayHandle; a++)
-            {
-                int closestColliderIndex = a;
-                for (int b = a + 1; b < colliders.Length; b++)
-                {
-                    if (Vector3.Distance(colliders[closestColliderIndex].bounds.center, pointerPos) > Vector3.Distance(colliders[b].bounds.center, pointerPos))
-                        closestColliderIndex = b;
-                }
-                Collider2D temp = colliders[a];
-                colliders[a] = colliders[closestColliderIndex];
-                colliders[closestColliderIndex] = temp;
-
-                closestColliders[a] = colliders[a];
-            }
-            return closestColliders;
-        }
-        return colliders;
-    }
-
-    public void OperateHandle()     // This method is called by the input manager to handle the user input.
-    {
-        Vector2 pointerPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        Collider2D[] colliders = CheckPosition(pointerPos);
-        if (colliders != null)  // CheckPosition method returns the required number of colliders if there are enough around
-        {                       // the input position
-            if (!handle)    // If there is not a handle in the game, a new one is created and placed at where the user input
-            {               // shows
-                GameObject newHandle = Instantiate(handlePrefab, transform);
-                handle = newHandle.transform;
-                handleScript = newHandle.GetComponent<Handle>();
-                handleScript.Lock(colliders);
-            }
-            else
-            {
-                handleScript.Relocate(colliders);       // If there is already a handle in the game, it is relocated to the new
-            }                                           // position that the user input determined           
-        }
-    }
-
     public void RestartGrid()
     {
         ResetGrid();
         GenerateGrid();
         inputManager.UnlockInput();
-    }
-
-    public void ProcessSwipe(Vector2 pointerDownPos, Vector2 pointerUpPos)
-    {
-        Directions swipeDirection = Directions.None;
-        if (handle)
-        {
-            Vector2 projection = Vector3.Project(pointerDownPos, pointerUpPos);
-            float swipeProjectionAngle = Vector3.Angle(projection - (Vector2)handle.position, pointerUpPos - pointerDownPos);
-            if (!IsValueInRange(swipeProjectionAngle, 30f, 150f))
-                return;
-            float swipeDirectionAngle = Vector3.SignedAngle(pointerUpPos - pointerDownPos, new Vector3(1f, 0f, 0f), Vector3.back);
-
-            if(IsValueInRange(swipeDirectionAngle, 0f, 45f) || IsValueInRange(swipeDirectionAngle, -45f, 0f))
-            {
-                swipeDirection = Directions.Right;
-            }
-            else if (IsValueInRange(swipeDirectionAngle, 45f, 135f))
-            {
-                swipeDirection = Directions.Up;
-            }
-            else if (IsValueInRange(swipeDirectionAngle, 135f, 180f) || IsValueInRange(swipeDirectionAngle, -180f, -135f))
-            {
-                swipeDirection = Directions.Left;
-            }
-            else if (IsValueInRange(swipeDirectionAngle, -135f, -45f))
-            {
-                swipeDirection = Directions.Down;
-            }
-
-            switch (swipeDirection)
-            {
-                case Directions.Left:
-                    if (projection.y < handle.position.y)
-                        handleScript.SpinClokwise();
-                    else if (projection.y > handle.position.y)
-                        handleScript.SpinCounterclokwise();
-                    break;
-                case Directions.Right:
-                    if (projection.y < handle.position.y)
-                        handleScript.SpinCounterclokwise();
-                    else if (projection.y > handle.position.y)
-                        handleScript.SpinClokwise();
-                    break;
-                case Directions.Up:
-                    if (projection.x < handle.position.x)
-                        handleScript.SpinClokwise();
-                    else if (projection.x > handle.position.x)
-                        handleScript.SpinCounterclokwise();
-                    break;
-                case Directions.Down:
-                    if (projection.x < handle.position.x)
-                        handleScript.SpinCounterclokwise();
-                    else if (projection.x > handle.position.x)
-                        handleScript.SpinClokwise();
-                    break;
-            }
-        }
-    }
-
-    private bool IsValueInRange(float value, float min, float max)
-    {
-        return value <= max && value > min;
     }
 }

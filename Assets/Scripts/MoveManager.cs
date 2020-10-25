@@ -11,6 +11,7 @@ public class MoveManager : BaseUIUser
 
     private void Awake()
     {
+        #region Singleton
         if (!Instance)
         {
             Instance = this;
@@ -21,6 +22,7 @@ public class MoveManager : BaseUIUser
             DestroyImmediate(gameObject);
             return;
         }
+        #endregion
     }
 
     public void MadeMove()

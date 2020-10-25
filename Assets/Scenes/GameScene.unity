@@ -336,6 +336,7 @@ GameObject:
   - component: {fileID: 323002676}
   - component: {fileID: 323002677}
   - component: {fileID: 323002675}
+  - component: {fileID: 323002684}
   - component: {fileID: 323002680}
   - component: {fileID: 323002683}
   - component: {fileID: 323002679}
@@ -361,14 +362,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6e43ed53b9c4f92469f04c2ccafa1a4c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tileLayerMask:
-    serializedVersion: 2
-    m_Bits: 256
   nColumns: 8
   nRows: 9
   nodePrefab: {fileID: 1270665846268167458, guid: d00c0f8fe2515ae4ca6650cb7ae69a7c,
-    type: 3}
-  handlePrefab: {fileID: 5166840823704390424, guid: 61629b65a17b58842b0106454ac4480a,
     type: 3}
 --- !u!4 &323002672
 Transform:
@@ -535,6 +531,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7ac135d928d0e114b83205a28d2950cb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &323002684
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 323002670}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a54a5f0750bbd67489c276de850cb504, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  handlePrefab: {fileID: 5166840823704390424, guid: 61629b65a17b58842b0106454ac4480a,
+    type: 3}
+  tileLayerMask:
+    serializedVersion: 2
+    m_Bits: 256
 --- !u!1 &338839747
 GameObject:
   m_ObjectHideFlags: 0
