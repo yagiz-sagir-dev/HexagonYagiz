@@ -7,14 +7,17 @@ public class ScoreCheckForBombGeneration : MonoBehaviour
 
     private ScoreManager scoreManager;
     private TileFactory tileFactory;
+    private GameKiller gameKiller;
     private int nBombsGenerated;
 
     void Start()
     {
         scoreManager = ScoreManager.Instance;
         tileFactory = TileFactory.Instance;
+        gameKiller = GameKiller.Instance;
 
         scoreManager.AddScoreDependentTrigger(CheckScore);
+        gameKiller.AddGameOverTrigger(ResetCount);
     }
 
     private void CheckScore()
@@ -24,5 +27,10 @@ public class ScoreCheckForBombGeneration : MonoBehaviour
             tileFactory.GenerateBomb();
             nBombsGenerated++;
         }
+    }
+
+    private void ResetCount()
+    {
+        nBombsGenerated = 0;
     }
 }
